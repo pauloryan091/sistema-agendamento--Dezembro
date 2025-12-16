@@ -2,10 +2,16 @@ from flask import Flask, request, jsonify, render_template, session, redirect, u
 import sqlite3
 import os
 from datetime import datetime
-import base64
+import smtplib
+from email.message import EmailMessage
+import ssl
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente
+load_dotenv()
 
 app = Flask(__name__, template_folder='.', static_folder='static')
-app.secret_key = 'sua_chave_secreta_aqui_123456'
+app.secret_key = os.getenv('SECRET_KEY', 'sua_chave_secreta_aqui_123456')
 
 # Configurações do banco de dados
 DATABASE = 'banco.db'
@@ -78,6 +84,420 @@ def init_db():
 
 # Inicializar banco de dados
 init_db()
+
+# =====================
+# FUNÇÃO DE ENVIO DE EMAIL
+# =====================
+
+def enviar_email_gmail(cliente_email, cliente_nome, servico_nome, data_agendamento, hora_agendamento, status):
+    """
+    Envia email de notificação de agendamento usando Gmail
+    """
+    try:
+        # CONFIGURAÇÃO DO EMAIL DO AGENDAMENTO+
+        SEU_EMAIL = os.getenv('EMAIL_USER', 'agendamentomais.suporte1@gmail.com')
+        SENHA_APP = os.getenv('EMAIL_PASSWORD', 'tffc icac kqfs igdf')
+        
+        if not SENHA_APP or SENHA_APP == "digite_aqui_a_senha_de_app":
+            print("❌ ERRO CRÍTICO: SENHA DO GMAIL NÃO CONFIGURADA!")
+            return False, "Senha do Gmail não configurada"
+        
+        if not cliente_email:
+            print(f"⚠️ Cliente {cliente_nome} não tem email cadastrado")
+            return False, "Cliente sem email"
+        
+        if "@" not in cliente_email or "." not in cliente_email:
+            print(f"⚠️ Email inválido: {cliente_email}")
+            return False, "Email inválido"
+        
+        # Converter data para formato brasileiro
+        try:
+            data_obj = datetime.strptime(data_agendamento, '%Y-%m-%d')
+            data_formatada = data_obj.strftime('%d/%m/%Y')
+        except:
+            data_formatada = data_agendamento
+        
+        print(f"📧 Enviando email para: {cliente_email}")
+        print(f"📤 Status: {status}")
+        
+        # Criar mensagem
+        msg = EmailMessage()
+        
+        # Definir assunto baseado no status
+        if status == 'pendente':
+            msg['Subject'] = f'Confirmação de Agendamento - {servico_nome}'
+        else:
+            msg['Subject'] = f'Atualização do Agendamento - {servico_nome}'
+        
+        msg['From'] = f'Agendamento+ <{SEU_EMAIL}>'
+        msg['To'] = cliente_email
+        
+        # Mensagens personalizadas por status
+        if status == 'pendente':
+            mensagem_titulo = "Aguardando Confirmação"
+            mensagem_corpo = f"""
+            <p>Seu agendamento está <strong>PENDENTE</strong>. Entre em contato conosco para confirmar.</p>
+            <p><strong>Urgente:</strong> Precisamos da sua confirmação para garantir seu horário.</p>
+            """
+            cor_status = '#ffc107'
+            cor_texto = '#212529'
+            
+        elif status == 'confirmado':
+            mensagem_titulo = "Agendamento Confirmado!"
+            mensagem_corpo = f"""
+            <p>Seu agendamento foi <strong>CONFIRMADO</strong>. Estamos esperando por você!</p>
+            <p><strong>Importante:</strong> Chegue com 10 minutos de antecedência.</p>
+            """
+            cor_status = '#17a2b8'
+            cor_texto = 'white'
+            
+        elif status == 'realizado':
+            mensagem_titulo = "Agendamento Realizado"
+            mensagem_corpo = f"""
+            <p>Seu agendamento foi <strong>REALIZADO</strong> com sucesso!</p>
+            <p><strong>Obrigado por confiar em nós!</strong> Esperamos ter atendido suas expectativas.</p>
+            """
+            cor_status = '#28a745'
+            cor_texto = 'white'
+            
+        elif status == 'cancelado':
+            mensagem_titulo = "Agendamento Cancelado"
+            mensagem_corpo = f"""
+            <p>Seu agendamento foi <strong>CANCELADO</strong>.</p>
+            <p>Entre em contato conosco para mais informações ou para reagendar.</p>
+            """
+            cor_status = '#dc3545'
+            cor_texto = 'white'
+        else:
+            mensagem_titulo = "Atualização do Agendamento"
+            mensagem_corpo = f"<p>Seu agendamento foi atualizado para: <strong>{status.upper()}</strong></p>"
+            cor_status = '#6c757d'
+            cor_texto = 'white'
+        
+        # HTML do email
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento+ - Atualização</title>
+    <style>
+        body {{
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        }}
+        
+        .container {{
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }}
+        
+        .header {{
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }}
+        
+        .logo {{
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }}
+        
+        .logo span {{
+            color: #ffd700;
+        }}
+        
+        .tagline {{
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }}
+        
+        .content {{
+            padding: 30px;
+        }}
+        
+        .status-badge {{
+            background: {cor_status};
+            color: {cor_texto};
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-block;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }}
+        
+        .info-card {{
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #007bff;
+        }}
+        
+        .info-item {{
+            display: flex;
+            margin: 10px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }}
+        
+        .info-label {{
+            font-weight: 600;
+            min-width: 120px;
+            color: #343a40;
+        }}
+        
+        .info-value {{
+            color: #555;
+        }}
+        
+        .message-box {{
+            background: rgba(0, 123, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #007bff;
+        }}
+        
+        .contact-section {{
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+        }}
+        
+        .contact-buttons {{
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }}
+        
+        .contact-btn {{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #343a40;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }}
+        
+        .contact-btn.instagram {{
+            border: 2px solid #E4405F;
+            color: #E4405F;
+        }}
+        
+        .contact-btn.whatsapp {{
+            border: 2px solid #25D366;
+            color: #25D366;
+        }}
+        
+        .footer {{
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }}
+        
+        @media (max-width: 600px) {{
+            .container {{
+                margin: 10px;
+            }}
+            
+            .contact-buttons {{
+                flex-direction: column;
+                align-items: center;
+            }}
+            
+            .contact-btn {{
+                width: 100%;
+                max-width: 250px;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Agendamento<span>+</span></div>
+            <p class="tagline">Sistema de Agendamento Online </p>
+        </div>
+        
+        <div class="content">
+            <div class="status-badge">
+                {status.upper()}
+            </div>
+            
+            <h2 style="color: #343a40; margin-top: 0;">Olá, {cliente_nome}!</h2>
+            <p style="color: #666;">Seu agendamento foi atualizado:</p>
+            
+            <div class="message-box">
+                <h3 style="margin-top: 0; color: #007bff;">{mensagem_titulo}</h3>
+                {mensagem_corpo}
+            </div>
+            
+            <div class="info-card">
+                <div class="info-item">
+                    <span class="info-label">Serviço:</span>
+                    <span class="info-value">{servico_nome}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Data:</span>
+                    <span class="info-value">{data_formatada}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Hora:</span>
+                    <span class="info-value">{hora_agendamento}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value" style="color: {cor_status}; font-weight: 600;">{status.upper()}</span>
+                </div>
+            </div>
+            
+            <div class="contact-section">
+                <p style="margin-bottom: 15px; color: #666;">Em caso de dúvidas, entre em contato conosco:</p>
+                
+                <div class="contact-buttons">
+                    <a href="https://www.instagram.com/agendamentomais/" target="_blank" class="contact-btn instagram">
+                        <i class="fab fa-instagram"></i>
+                        <span>Instagram</span>
+                    </a>
+                    <a href="https://wa.me/5561985825956" target="_blank" class="contact-btn whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p style="margin: 0 0 10px 0; font-weight: 600;">© 2025 Agendamento+. Todos os direitos reservados.</p>
+            <p style="margin: 0; color: #999;">
+                Esta é uma mensagem automática do sistema Agendamento+.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+        """
+        
+        # Versão texto simples
+        if status == 'pendente':
+            mensagem_texto = f"""Olá {cliente_nome},
+
+Seu agendamento está PENDENTE de confirmação.
+
+Detalhes:
+Serviço: {servico_nome}
+Data: {data_formatada}
+Hora: {hora_agendamento}
+
+URGENTE: Entre em contato conosco para confirmar seu horário.
+
+Instagram: @agendamentomais
+WhatsApp: (61) 98582-5956"""
+        
+        elif status == 'confirmado':
+            mensagem_texto = f"""Olá {cliente_nome},
+
+Seu agendamento foi CONFIRMADO!
+
+Detalhes:
+Serviço: {servico_nome}
+Data: {data_formatada}
+Hora: {hora_agendamento}
+
+Importante: Chegue com 10 minutos de antecedência.
+
+Estamos esperando por você!
+
+Instagram: @agendamentomais
+WhatsApp: (61) 98582-5956"""
+        
+        elif status == 'realizado':
+            mensagem_texto = f"""Olá {cliente_nome},
+
+Seu agendamento foi marcado como REALIZADO!
+
+Detalhes:
+Serviço: {servico_nome}
+Data: {data_formatada}
+Hora: {hora_agendamento}
+
+Obrigado por confiar em nós!
+
+Instagram: @agendamentomais
+WhatsApp: (61) 98582-5956"""
+        
+        elif status == 'cancelado':
+            mensagem_texto = f"""Olá {cliente_nome},
+
+Seu agendamento foi CANCELADO.
+
+Detalhes:
+Serviço: {servico_nome}
+Data: {data_formatada}
+Hora: {hora_agendamento}
+
+Entre em contato conosco para mais informações.
+
+Instagram: @agendamentomais
+WhatsApp: (61) 98582-5956"""
+        else:
+            mensagem_texto = f"""Olá {cliente_nome},
+
+Seu agendamento foi atualizado.
+
+Detalhes:
+Serviço: {servico_nome}
+Data: {data_formatada}
+Hora: {hora_agendamento}
+Status: {status.upper()}
+
+Instagram: @agendamentomais
+WhatsApp: (61) 98582-5956"""
+        
+        # Adicionar conteúdo
+        msg.set_content(mensagem_texto)
+        msg.add_alternative(html, subtype='html')
+        
+        # Enviar email
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
+            server.login(SEU_EMAIL, SENHA_APP)
+            server.send_message(msg)
+        
+        print(f"✅ Email enviado para {cliente_email}")
+        return True, "Email enviado com sucesso"
+        
+    except smtplib.SMTPAuthenticationError as e:
+        print(f"❌ ERRO DE AUTENTICAÇÃO: {str(e)}")
+        return False, "Erro de autenticação no Gmail"
+        
+    except Exception as e:
+        print(f"❌ Erro ao enviar email: {str(e)}")
+        return False, str(e)
 
 # =====================
 # ROTAS PRINCIPAIS (PÁGINAS HTML)
@@ -404,7 +824,7 @@ def api_cliente(cliente_id):
         return jsonify({'success': False, 'message': f'Erro ao processar cliente: {str(e)}'})
 
 # =====================
-# API - AGENDAMENTOS (CORRIGIDA)
+# API - AGENDAMENTOS (COM EMAIL)
 # =====================
 
 @app.route('/api/agendamentos', methods=['GET', 'POST'])
@@ -418,7 +838,8 @@ def api_agendamentos():
     if request.method == 'GET':
         agendamentos = conn.execute('''
             SELECT a.*, c.nome as cliente_nome, c.telefone as cliente_telefone, 
-                   s.nome as servico_nome, c.id as cliente_id, s.id as servico_id
+                   c.email as cliente_email, s.nome as servico_nome, 
+                   c.id as cliente_id, s.id as servico_id
             FROM agendamentos a 
             LEFT JOIN clientes c ON a.cliente_id = c.id 
             LEFT JOIN servicos s ON a.servico_id = s.id 
@@ -434,6 +855,7 @@ def api_agendamentos():
                 'cliente_id': agendamento['cliente_id'],
                 'cliente_nome': agendamento['cliente_nome'],
                 'cliente_telefone': agendamento['cliente_telefone'],
+                'cliente_email': agendamento['cliente_email'],
                 'servico_id': agendamento['servico_id'],
                 'servico_nome': agendamento['servico_nome'],
                 'data_agendamento': agendamento['data_agendamento'],
@@ -457,12 +879,12 @@ def api_agendamentos():
             
             # Verificar se cliente e serviço pertencem ao usuário
             cliente = conn.execute(
-                'SELECT id FROM clientes WHERE id = ? AND usuario_id = ?', 
+                'SELECT * FROM clientes WHERE id = ? AND usuario_id = ?', 
                 (cliente_id, usuario_id)
             ).fetchone()
             
             servico = conn.execute(
-                'SELECT id FROM servicos WHERE id = ? AND usuario_id = ?', 
+                'SELECT * FROM servicos WHERE id = ? AND usuario_id = ?', 
                 (servico_id, usuario_id)
             ).fetchone()
             
@@ -474,14 +896,27 @@ def api_agendamentos():
                 conn.close()
                 return jsonify({'success': False, 'message': 'Serviço não encontrado'})
             
+            # Inserir agendamento
             conn.execute(
                 'INSERT INTO agendamentos (cliente_id, servico_id, data_agendamento, hora_agendamento, status, usuario_id) VALUES (?, ?, ?, ?, ?, ?)',
                 (int(cliente_id), int(servico_id), data_agendamento, hora_agendamento, status, usuario_id)
             )
             conn.commit()
+            
+            # ========== ENVIAR EMAIL PARA NOVO AGENDAMENTO ==========
+            if cliente['email']:
+                enviar_email_gmail(
+                    cliente['email'],
+                    cliente['nome'],
+                    servico['nome'],
+                    data_agendamento,
+                    hora_agendamento,
+                    status
+                )
+            
             conn.close()
             
-            return jsonify({'success': True, 'message': 'Agendamento realizado com sucesso!'})
+            return jsonify({'success': True, 'message': 'Agendamento realizado com sucesso! Email enviado.'})
         
         except Exception as e:
             conn.close()
@@ -496,11 +931,15 @@ def api_agendamento(agendamento_id):
     conn = get_db_connection()
     
     try:
-        # Verificar se o agendamento pertence ao usuário
-        agendamento = conn.execute(
-            'SELECT * FROM agendamentos WHERE id = ? AND usuario_id = ?', 
-            (agendamento_id, usuario_id)
-        ).fetchone()
+        # Buscar dados COMPLETOS do agendamento
+        agendamento = conn.execute('''
+            SELECT a.*, c.email as cliente_email, c.nome as cliente_nome, 
+                   s.nome as servico_nome, c.id as cliente_id, s.id as servico_id
+            FROM agendamentos a 
+            LEFT JOIN clientes c ON a.cliente_id = c.id 
+            LEFT JOIN servicos s ON a.servico_id = s.id 
+            WHERE a.id = ? AND a.usuario_id = ?
+        ''', (agendamento_id, usuario_id)).fetchone()
         
         if not agendamento:
             conn.close()
@@ -514,14 +953,27 @@ def api_agendamento(agendamento_id):
                 conn.close()
                 return jsonify({'success': False, 'message': 'Status inválido'})
             
+            # Atualizar status
             conn.execute(
                 'UPDATE agendamentos SET status = ? WHERE id = ?',
                 (status, agendamento_id)
             )
             conn.commit()
+            
+            # ========== ENVIAR EMAIL AO MUDAR STATUS ==========
+            if agendamento['cliente_email']:
+                enviar_email_gmail(
+                    agendamento['cliente_email'],
+                    agendamento['cliente_nome'],
+                    agendamento['servico_nome'],
+                    agendamento['data_agendamento'],
+                    agendamento['hora_agendamento'],
+                    status
+                )
+            
             conn.close()
             
-            return jsonify({'success': True, 'message': 'Status do agendamento atualizado com sucesso!'})
+            return jsonify({'success': True, 'message': f'Status atualizado e email enviado!'})
         
         elif request.method == 'DELETE':
             conn.execute('DELETE FROM agendamentos WHERE id = ?', (agendamento_id,))
@@ -533,83 +985,6 @@ def api_agendamento(agendamento_id):
     except Exception as e:
         conn.close()
         return jsonify({'success': False, 'message': f'Erro ao processar agendamento: {str(e)}'})
-
-# =====================
-# API - RELATÓRIOS E ESTATÍSTICAS
-# =====================
-
-@app.route('/api/dashboard/estatisticas')
-def api_dashboard_estatisticas():
-    if 'usuario_id' not in session:
-        return jsonify({'error': 'Não autorizado'}), 401
-    
-    usuario_id = session['usuario_id']
-    conn = get_db_connection()
-    
-    try:
-        # Data atual
-        hoje = datetime.now().strftime('%Y-%m-%d')
-        mes_atual = datetime.now().strftime('%Y-%m')
-        
-        # Agendamentos hoje
-        agendamentos_hoje = conn.execute('''
-            SELECT COUNT(*) as total FROM agendamentos 
-            WHERE usuario_id = ? AND data_agendamento = ?
-        ''', (usuario_id, hoje)).fetchone()['total']
-        
-        # Agendamentos este mês
-        agendamentos_mes = conn.execute('''
-            SELECT COUNT(*) as total FROM agendamentos 
-            WHERE usuario_id = ? AND strftime('%Y-%m', data_agendamento) = ?
-        ''', (usuario_id, mes_atual)).fetchone()['total']
-        
-        # Total de clientes
-        total_clientes = conn.execute('''
-            SELECT COUNT(*) as total FROM clientes WHERE usuario_id = ?
-        ''', (usuario_id,)).fetchone()['total']
-        
-        # Total de serviços
-        total_servicos = conn.execute('''
-            SELECT COUNT(*) as total FROM servicos WHERE usuario_id = ?
-        ''', (usuario_id,)).fetchone()['total']
-        
-        # Agendamentos por status
-        agendamentos_pendentes = conn.execute('''
-            SELECT COUNT(*) as total FROM agendamentos 
-            WHERE usuario_id = ? AND status = 'pendente'
-        ''', (usuario_id,)).fetchone()['total']
-        
-        agendamentos_confirmados = conn.execute('''
-            SELECT COUNT(*) as total FROM agendamentos 
-            WHERE usuario_id = ? AND status = 'confirmado'
-        ''', (usuario_id,)).fetchone()['total']
-        
-        agendamentos_realizados = conn.execute('''
-            SELECT COUNT(*) as total FROM agendamentos 
-            WHERE usuario_id = ? AND status = 'realizado'
-        ''', (usuario_id,)).fetchone()['total']
-        
-        agendamentos_cancelados = conn.execute('''
-            SELECT COUNT(*) as total FROM agendamentos 
-            WHERE usuario_id = ? AND status = 'cancelado'
-        ''', (usuario_id,)).fetchone()['total']
-        
-        conn.close()
-        
-        return jsonify({
-            'agendamentos_hoje': agendamentos_hoje,
-            'agendamentos_mes': agendamentos_mes,
-            'total_clientes': total_clientes,
-            'total_servicos': total_servicos,
-            'agendamentos_pendentes': agendamentos_pendentes,
-            'agendamentos_confirmados': agendamentos_confirmados,
-            'agendamentos_realizados': agendamentos_realizados,
-            'agendamentos_cancelados': agendamentos_cancelados
-        })
-    
-    except Exception as e:
-        conn.close()
-        return jsonify({'error': f'Erro ao carregar estatísticas: {str(e)}'}), 500
 
 # =====================
 # API - DADOS DO USUÁRIO
@@ -637,7 +1012,6 @@ def serve_files(filename):
     except:
         return "Arquivo não encontrado", 404
 
-# Rota específica para arquivos CSS e JS
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory('static', filename)
@@ -651,17 +1025,18 @@ if __name__ == '__main__':
     if not os.path.exists('static'):
         os.makedirs('static')
     
-    print("=== SISTEMA DE AGENDAMENTO ===")
-    print("Servidor rodando em: http://localhost:5000")
-    print("Banco de dados: banco.db")
-    print("Rotas disponíveis:")
-    print("  / - Login")
-    print("  /cadastro - Cadastro de usuário")
-    print("  /dashboard - Dashboard principal")
-    print("  /servicos - Gerenciar serviços")
-    print("  /clientes - Gerenciar clientes")
-    print("  /agendamentos - Gerenciar agendamentos")
-    print("  /perfil - Perfil do usuário")
-    print("==============================")
+    print("=" * 60)
+    print("AGENDAMENTO+ - SISTEMA COMPLETO")
+    print("=" * 60)
+    print("🌐 Servidor: http://localhost:5000")
+    print("💾 Banco de dados: banco.db")
+    print("📧 Email configurado: agendamentomais.suporte1@gmail.com")
+    print("=" * 60)
+    print("📱 Redes Sociais:")
+    print("   Instagram: @agendamentomais")
+    print("   WhatsApp: (61) 98582-5956")
+    print("=" * 60)
+    print("✅ Sistema pronto para uso!")
+    print("=" * 60)
     
     app.run(debug=True, host='0.0.0.0', port=5000)

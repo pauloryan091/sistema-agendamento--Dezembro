@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Agendamento+</title>
-  
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <meta name="theme-color" content="#007bff">
   <meta name="apple-mobile-web-app-status-bar-style" content="#007bff">
   <meta name="msapplication-navbutton-color" content="#007bff">
@@ -818,7 +818,9 @@
       white-space: nowrap;
       border: 0;
     }
-
+.footer-link i {
+  font-size: 1.5rem;
+}
     /* Foco visível para acessibilidade */
     .stat-card:focus-visible,
     .action-btn:focus-visible,
@@ -965,9 +967,13 @@
       <a href="perfil.html" class="nav-link">Perfil</a>
     </nav>
     <div class="footer-social">
-      <a href="https://www.instagram.com/agendamentomais/?next=%2F" target="_blank" class="footer-link">Instagram</a>
-      <a href="https://wa.me/5561985825956" target="_blank" class="footer-link">WhatsApp</a>
-    </div>
+  <a href="https://www.instagram.com/agendamentomais/?next=%2F" target="_blank" class="footer-link" title="Instagram">
+    <i class="fab fa-instagram"></i>
+  </a>
+  <a href="https://wa.me/5561985825956" target="_blank" class="footer-link" title="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+</div>
   </div>
   <div class="footer-copy">
     <p>&copy; 2025 Agendamento+. Todos os direitos reservados.</p>
@@ -1152,21 +1158,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let isChatOpen = false;
   let hasInteracted = false;
 
-  const FAQ_RESPONSES = {
-    'tutorial': '📚 **Tutorial Completo:**\n\n1) **Agendamentos**: Clique em "Novo Agendamento", selecione cliente, serviço, data e hora\n2) **Serviços**: Vá em "Serviços" para cadastrar novos serviços\n3) **Clientes**: Em "Clientes" você gerencia todos os clientes\n4) **Dashboard**: Aqui você vê estatísticas e agendamentos recentes\n\nPrecisa de ajuda com algo específico?',
+  const FAQ_RESPONSES = {'tutorial': '**Tutorial Completo:**\n\n1) **Agendamentos**: Clique em "Novo Agendamento", selecione cliente, serviço, data e hora\n2) **Serviços**: Vá em "Serviços" para cadastrar novos serviços\n3) **Clientes**: Em "Clientes" você gerencia todos os clientes\n4) **Dashboard**: Aqui você vê estatísticas e agendamentos recentes\n\nPrecisa de ajuda com algo específico?',
     
-    'agendamento': '📅 **Criar Agendamento:**\n\n1) Clique em "Novo Agendamento" no menu ou no Dashboard\n2) Selecione o cliente na lista\n3) Escolha o serviço desejado\n4) Defina data e horário\n5) Confirme o agendamento\n\n💡 **Dica**: Você pode visualizar todos os agendamentos na página específica!',
+'agendamento': '**Criar Agendamento:**\n\n1) Clique em "Novo Agendamento" no menu ou no Dashboard\n2) Selecione o cliente na lista\n3) Escolha o serviço desejado\n4) Defina data e horário\n5) Confirme o agendamento\n\n**Dica**: Você pode visualizar todos os agendamentos na página específica!',
     
-    'servico': '🛠️ **Cadastrar Serviços:**\n\n1) Vá para a página "Serviços"\n2) Clique em "Adicionar Serviço"\n3) Preencha: Nome, Descrição e Valor\n4) Adicione uma foto (opcional)\n5) Salve o serviço\n\n✅ **Pronto!** O serviço já estará disponível para agendamento.',
+'servico': '**Cadastrar Serviços:**\n\n1) Vá para a página "Serviços"\n2) Clique em "Adicionar Serviço"\n3) Preencha: Nome, Descrição e Valor\n4) Adicione uma foto (opcional)\n5) Salve o serviço\n\n**Pronto!** O serviço já estará disponível para agendamento.',
     
-    'cliente': '👥 **Gerenciar Clientes:**\n\n1) Acesse a página "Clientes"\n2) Para novo cliente: clique em "Novo Cliente"\n3) Preencha: Nome, Telefone, Email\n4) Salve as informações\n\n📞 **Importante**: Mantenha os dados atualizados para melhor atendimento!',
+'cliente': '**Gerenciar Clientes:**\n\n1) Acesse a página "Clientes"\n2) Para novo cliente: clique em "Novo Cliente"\n3) Preencha: Nome, Telefone, Email\n4) Salve as informações\n\n**Importante**: Mantenha os dados atualizados para melhor atendimento!',
     
-    'dashboard': '📊 **Como usar o Dashboard:**\n\n• **Cartões Estatísticos**: Veja agendamentos do dia, mês, serviços disponíveis e clientes\n• **Gráfico de Status**: Visualize a distribuição dos agendamentos por status\n• **Agendamentos Recentes**: Lista dos últimos 5 agendamentos\n• **Ações Rápidas**: Acesso rápido às principais funcionalidades\n\n🎯 **Tudo em um só lugar para você acompanhar!**',
+'dashboard': '**Como usar o Dashboard:**\n\n• **Cartões Estatísticos**: Veja agendamentos do dia, mês, serviços disponíveis e clientes\n• **Gráfico de Status**: Visualize a distribuição dos agendamentos por status\n• **Agendamentos Recentes**: Lista dos últimos 5 agendamentos\n• **Ações Rápidas**: Acesso rápido às principais funcionalidades\n\n**Tudo em um só lugar para você acompanhar!**',
     
-    'suporte': '🆘 **Suporte Técnico:**\n\n📱 **WhatsApp**: (61) 98582-5956\n📸 **Instagram**: @pauloryantomaz\n✉️ **Email**: contato@agendamentomais.com\n\n🕒 **Horário de atendimento**:\nSegunda a Sexta: 8h às 18h\nSábado: 8h às 12h\n\n💬 Estamos aqui para ajudar!',
+'suporte': '**Suporte Técnico:**\n\n**WhatsApp**: (61) 98582-5956\n**Instagram**: @agendamentomais\n**Email**: contato@agendamentomais.com\n\n**Horário de atendimento**:\nSegunda a Sexta: 8h às 18h\nSábado: 8h às 12h\n\nEstamos aqui para ajudar!',
     
-    'ajuda': '🤝 **Como posso ajudar?**\n\nClique em qualquer um dos botões abaixo para:\n• 📚 Ver tutorial completo\n• 📅 Criar um agendamento\n• 🛠️ Cadastrar serviços\n• 👥 Gerenciar clientes\n• 📊 Entender o Dashboard\n• 🆘 Falar com suporte\n\nO que você gostaria de saber?'
-  };
+'ajuda': '**Como posso ajudar?**\n\nClique em qualquer um dos botões abaixo para:\n• Ver tutorial completo\n• Criar um agendamento\n• Cadastrar serviços\n• Gerenciar clientes\n• Entender o Dashboard\n• Falar com suporte\n\nO que você gostaria de saber?'
+};
 
   /**
    * Adiciona uma mensagem ao chat.

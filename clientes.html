@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#007bff">
   <meta name="apple-mobile-web-app-status-bar-style" content="#007bff">
   <meta name="msapplication-navbutton-color" content="#007bff">
-  
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- CSS do Header -->
   <link rel="stylesheet" href="header.css">
   
@@ -142,7 +142,9 @@
       align-items: center;
       gap: 0.5rem;
     }
-
+.footer-link i {
+  font-size: 1.5rem;
+}
     .filtros-content {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -423,94 +425,96 @@
       transition: color 0.3s ease;
       font-weight: 500;
     }
-/* NEVE NATALINA - snow.css */
-.snow-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 999;
-}
 
-.snowflake {
-  position: absolute;
-  top: -10px;
-  color: #e0f7fa;
-  font-size: 1em;
-  user-select: none;
-  pointer-events: none;
-  animation: fall linear forwards;
-}
+    /* NEVE NATALINA - snow.css */
+    .snow-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
 
-@keyframes fall {
-  to {
-    transform: translateY(100vh) rotate(360deg);
-  }
-}
+    .snowflake {
+      position: absolute;
+      top: -10px;
+      color: #e0f7fa;
+      font-size: 1em;
+      user-select: none;
+      pointer-events: none;
+      animation: fall linear forwards;
+    }
 
-.frozen {
-  position: relative;
-  overflow: hidden;
-}
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+      }
+    }
 
-.frozen::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(173, 216, 230, 0.3);
-  border: 2px solid #b3e0ff;
-  border-radius: 12px;
-  z-index: 1;
-  pointer-events: none;
-}
+    .frozen {
+      position: relative;
+      overflow: hidden;
+    }
 
-.frozen::after {
-  content: '❄️';
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  font-size: 1.2rem;
-  z-index: 2;
-  pointer-events: none;
-}
+    .frozen::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(173, 216, 230, 0.3);
+      border: 2px solid #b3e0ff;
+      border-radius: 12px;
+      z-index: 1;
+      pointer-events: none;
+    }
 
-.ice-crack {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 30% 30%, transparent 10px, rgba(255,255,255,0.8) 11px, transparent 12px),
-    radial-gradient(circle at 70% 70%, transparent 8px, rgba(255,255,255,0.8) 9px, transparent 10px),
-    radial-gradient(circle at 50% 20%, transparent 6px, rgba(255,255,255,0.8) 7px, transparent 8px);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: 3;
-}
+    .frozen::after {
+      content: '❄️';
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 1.2rem;
+      z-index: 2;
+      pointer-events: none;
+    }
 
-.breaking {
-  animation: breakIce 0.5s ease forwards;
-}
+    .ice-crack {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 30% 30%, transparent 10px, rgba(255,255,255,0.8) 11px, transparent 12px),
+        radial-gradient(circle at 70% 70%, transparent 8px, rgba(255,255,255,0.8) 9px, transparent 10px),
+        radial-gradient(circle at 50% 20%, transparent 6px, rgba(255,255,255,0.8) 7px, transparent 8px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 3;
+    }
 
-@keyframes breakIce {
-  0% {
-    opacity: 0;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.2);
-  }
-}
+    .breaking {
+      animation: breakIce 0.5s ease forwards;
+    }
+
+    @keyframes breakIce {
+      0% {
+        opacity: 0;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.2);
+      }
+    }
+
     .footer-nav a:hover,
     .footer-social a:hover {
       text-decoration: underline;
@@ -693,7 +697,7 @@
   <div class="modal-content">
     <button class="modal-close" onclick="closeModalCliente()">&times;</button>
     <h2 id="modalTitulo">Adicionar Novo Cliente</h2>
-    <form id="formCliente">
+    <div id="formCliente">
       <input type="hidden" id="clienteId">
       <div class="form-group">
         <label for="nomeCliente" class="form-label">Nome Completo *</label>
@@ -708,14 +712,14 @@
         <input type="email" id="emailCliente" class="form-control" placeholder="exemplo@email.com">
       </div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-success">
+        <button type="button" id="btnSalvarCliente" class="btn btn-success">
           <i class="fas fa-save"></i> Salvar Cliente
         </button>
         <button type="button" class="btn btn-secondary" onclick="closeModalCliente()">
           <i class="fas fa-times"></i> Cancelar
         </button>
       </div>
-    </form>
+    </div>
   </div>
 </div>
 
@@ -732,25 +736,30 @@
       <a href="clientes.html" class="nav-link">Clientes</a>
       <a href="perfil.html" class="nav-link">Perfil</a>
     </nav>
-    <div class="footer-social">
-      <a href="https://www.instagram.com/agendamentomais/?next=%2F" target="_blank" class="footer-link">Instagram</a>
-      <a href="https://wa.me/5561985825956" target="_blank" class="footer-link">WhatsApp</a>
-    </div>
-  </div>
+ <div class="footer-social">
+  <a href="https://www.instagram.com/agendamentomais/?next=%2F" target="_blank" class="footer-link" title="Instagram">
+    <i class="fab fa-instagram"></i>
+  </a>
+  <a href="https://wa.me/5561985825956" target="_blank" class="footer-link" title="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+</div>
   <div class="footer-copy">
     <p>&copy; 2025 Agendamento+. Todos os direitos reservados.</p>
   </div>
 </footer>
+
 <script src="snow-universal.js"></script>
 <script src="header.js"></script>
 <script>
 // GERENCIAMENTO DE CLIENTES COM BANCO DE DADOS FLASK
 document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('modalCliente');
-  const form = document.getElementById('formCliente');
+  const formContainer = document.getElementById('formCliente');
   const tabelaBody = document.getElementById('tabelaClientesBody');
   const emptyState = document.getElementById('emptyState');
   const btnAddCliente = document.getElementById('btnAddCliente');
+  const btnSalvarCliente = document.getElementById('btnSalvarCliente');
 
   let todosClientes = [];
   let clienteEditando = null;
@@ -828,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =====================
-  // MODAL DE CLIENTES
+  // MODAL DE CLIENTES - FUNÇÕES GLOBAIS
   // =====================
   btnAddCliente.addEventListener('click', () => { 
     abrirModalNovoCliente();
@@ -839,7 +848,10 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.style.display = 'flex'; 
     document.getElementById('modalTitulo').textContent = 'Adicionar Novo Cliente';
     document.getElementById('clienteId').value = '';
-    form.reset();
+    document.getElementById('nomeCliente').value = '';
+    document.getElementById('telefoneCliente').value = '';
+    document.getElementById('emailCliente').value = '';
+    document.getElementById('nomeCliente').focus();
   }
 
   window.editarCliente = (clienteId) => {
@@ -852,12 +864,12 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('nomeCliente').value = cliente.nome;
       document.getElementById('telefoneCliente').value = cliente.telefone || '';
       document.getElementById('emailCliente').value = cliente.email || '';
+      document.getElementById('nomeCliente').focus();
     }
   }
 
   window.closeModalCliente = () => { 
     modal.style.display = 'none'; 
-    form.reset();
     clienteEditando = null;
   }
 
@@ -874,28 +886,105 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =====================
+  // SALVAR CLIENTE (botão separado - NÃO é submit)
+  // =====================
+  btnSalvarCliente.addEventListener('click', async () => {
+    const clienteId = document.getElementById('clienteId').value;
+    const nome = document.getElementById('nomeCliente').value.trim();
+    const telefone = document.getElementById('telefoneCliente').value.trim();
+    const email = document.getElementById('emailCliente').value.trim();
+    
+    // Validações
+    if (!nome) {
+      alert('Nome é obrigatório');
+      document.getElementById('nomeCliente').focus();
+      return;
+    }
+    
+    // Validação básica de email
+    if (email && !isValidEmail(email)) {
+      alert('Por favor, insira um email válido');
+      document.getElementById('emailCliente').focus();
+      return;
+    }
+    
+    // Validação básica de telefone
+    if (telefone && telefone.replace(/\D/g, '').length < 10) {
+      alert('Por favor, insira um telefone válido com DDD');
+      document.getElementById('telefoneCliente').focus();
+      return;
+    }
+    
+    const dadosCliente = {
+      nome: nome,
+      telefone: telefone,
+      email: email
+    };
+
+    try {
+      let url = '/api/clientes';
+      let method = 'POST';
+
+      // Se está editando, muda para PUT
+      if (clienteId) {
+        url = `/api/clientes/${clienteId}`;
+        method = 'PUT';
+      }
+      
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dadosCliente)
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert(data.message);
+        closeModalCliente();
+        carregarClientes();
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      alert('Erro ao salvar cliente');
+    }
+  });
+
+  // Permitir salvar com Enter (mas sem submit de formulário)
+  document.getElementById('formCliente').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevenir comportamento padrão do Enter
+      btnSalvarCliente.click();
+    }
+  });
+
+  // =====================
   // CARREGAR CLIENTES DO BANCO
   // =====================
-  function carregarClientes() {
-    fetch('/api/clientes')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Erro ao carregar clientes');
-        }
-        return response.json();
-      })
-      .then(clientes => {
-        todosClientes = clientes;
-        filtrarClientes();
-      })
-      .catch(error => {
-        console.error('Erro ao carregar clientes:', error);
-        emptyState.style.display = 'block';
-        emptyState.innerHTML = `
-          <h3>Erro ao carregar clientes</h3>
-          <p>Tente recarregar a página</p>
-        `;
-      });
+  async function carregarClientes() {
+    try {
+      const response = await fetch('/api/clientes');
+      
+      if (!response.ok) {
+        throw new Error('Erro ao carregar clientes');
+      }
+      
+      const clientes = await response.json();
+      todosClientes = clientes;
+      filtrarClientes();
+      
+    } catch (error) {
+      console.error('Erro ao carregar clientes:', error);
+      emptyState.style.display = 'block';
+      emptyState.innerHTML = `
+        <h3>Erro ao carregar clientes</h3>
+        <p>Tente recarregar a página</p>
+      `;
+    }
   }
 
   function atualizarTabela(clientes) {
@@ -931,72 +1020,6 @@ document.addEventListener('DOMContentLoaded', () => {
       tabelaBody.appendChild(tr);
     });
   }
-
-  // =====================
-  // GERENCIAMENTO DE CLIENTES
-  // =====================
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    
-    const clienteId = document.getElementById('clienteId').value;
-    const nome = document.getElementById('nomeCliente').value.trim();
-    const telefone = document.getElementById('telefoneCliente').value.trim();
-    const email = document.getElementById('emailCliente').value.trim();
-    
-    if (!nome) {
-      alert('Nome é obrigatório');
-      return;
-    }
-    
-    // Validação básica de email
-    if (email && !isValidEmail(email)) {
-      alert('Por favor, insira um email válido');
-      return;
-    }
-    
-    // Validação básica de telefone (apenas verifica se tem pelo menos 10 caracteres)
-    if (telefone && telefone.replace(/\D/g, '').length < 10) {
-      alert('Por favor, insira um telefone válido com DDD');
-      return;
-    }
-    
-    const dadosCliente = {
-      nome: nome,
-      telefone: telefone,
-      email: email
-    };
-
-    let url = '/api/clientes';
-    let method = 'POST';
-
-    // Se está editando, muda para PUT
-    if (clienteId) {
-      url = `/api/clientes/${clienteId}`;
-      method = 'PUT';
-    }
-    
-    fetch(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(dadosCliente)
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert(data.message);
-        closeModalCliente();
-        carregarClientes();
-      } else {
-        alert(data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Erro:', error);
-      alert('Erro ao salvar cliente');
-    });
-  });
 
   // Função auxiliar para validar email
   function isValidEmail(email) {
